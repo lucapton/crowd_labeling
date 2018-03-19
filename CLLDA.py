@@ -38,7 +38,7 @@ class CLLDA:
 
     def __init__(self, votes, workers, instances, vote_ids=None, worker_ids=None, instance_ids=None,
                  worker_prior=None, instance_prior=None, transform=None,
-                 num_epochs=1000, burn_in=200, updateable=True, save_samples=False, seed=np.random.randint(int(1e8))):
+                 num_epochs=1000, burn_in=200, updateable=True, save_samples=False, seed=None):
 
         """
         Initializes settings for the model and automatically calls the inference function.
@@ -247,15 +247,15 @@ class CLLDA:
         start = time()
         for ep in range(starting_epoch, starting_epoch + self.num_epochs):
             # begin epoch
-            print 'starting epoch ' + str(ep + 1)
+            print('starting epoch ' + str(ep + 1))
             if ep > starting_epoch:
                 time_to_go = (time() - start) * (self.num_epochs - ep) / ep
                 if time_to_go >= 3600:
-                    print 'Estimated time to finish: %.2f hours' % (time_to_go / 3600,)
+                    print('Estimated time to finish: %.2f hours' % (time_to_go / 3600,))
                 elif time_to_go >= 60:
-                    print 'Estimated time to finish: %.1f minutes' % (time_to_go / 60,)
+                    print('Estimated time to finish: %.1f minutes' % (time_to_go / 60,))
                 else:
-                    print 'Estimated time to finish: %.1f seconds' % (time_to_go,)
+                    print('Estimated time to finish: %.1f seconds' % (time_to_go,))
             ep_start = time()
 
             # gibbs sampling
@@ -287,19 +287,19 @@ class CLLDA:
                 update_worker_mats()
 
             # print epoch LL and duration
-            print 'Epoch completed in %.1f seconds' % (time() - ep_start,)
-            print 'LL: %.6f' % (self.LL[ep])
+            print('Epoch completed in %.1f seconds' % (time() - ep_start,))
+            print('LL: %.6f' % (self.LL[ep]))
 
         # adjust label covariances
         self.labels_cov = [x * self.num_samples / (self.num_samples - 1.) for x in self.labels_cov]
 
         time_total = time() - start
         if time_total >= 3600:
-            print 'CLLDA completed in %.2f hours' % (time_total / 3600,)
+            print('CLLDA completed in %.2f hours' % (time_total / 3600,))
         elif time_total >= 60:
-            print 'CLLDA completed in %.1f minutes' % (time_total / 60,)
+            print('CLLDA completed in %.1f minutes' % (time_total / 60,))
         else:
-            print 'CLLDA completed in %.1f seconds' % (time_total,)
+            print('CLLDA completed in %.1f seconds' % (time_total,))
 
     #
     def update(self, votes, workers, instances, vote_ids=None, instance_ids=None, worker_ids=None, worker_prior=None,
@@ -365,7 +365,7 @@ class CLLDA:
             # insert old vote-classes and initialize new vote-classes
             old_vote_classes = self.vote_classes.copy()
             self.vote_classes = np.zeros_like(votes)
-	    old_dict = {y: x for x, y in enumerate(zip(self.votes, self.workers, self.instances))}
+            old_dict = {y: x for x, y in enumerate(zip(self.votes, self.workers, self.instances))}
             for it, index in enumerate(zip(votes, workers, instances)):
                 try:
                     self.vote_classes[it] = old_vote_classes[old_dict[index]]
@@ -434,17 +434,21 @@ def concurrent_cllda(models, votes, workers, instances, nprocs=4, **kwargs):
         kwargs = [deepcopy(kwargs) for x in range(models)]
         for it in range(models):
             kwargs[it]['seed'] = np.random.randint(int(1e8))
-        return pool.map(_new_cllda, [(votes, workers, instances, kwa) for kwa in kwargs])
+        out = pool.map(_new_cllda, [(votes, workers, instances, kwa) for kwa in kwargs])
 
     elif hasattr(models, '__iter__'):
         print('Updating CL-LDA models in parallel...')
-        return pool.map(_update_cllda, [(model, votes, workers, instances, kwargs) for model in models])
+        out = pool.map(_update_cllda, [(model, votes, workers, instances, kwargs) for model in models])
 
     else:
+        pool.close()
         TypeError('Unknown type for input: models.')
 
     # close parallel pool
     pool.close()
+    print('Multiprocessing pool closed.')
+
+    return out
 
 
 def combine_cllda(models):

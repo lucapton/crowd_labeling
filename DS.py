@@ -108,7 +108,7 @@ class DS:
     # DS optimization using EM
     def ds(self, votes, workers, instances, test):
         # precalculate indices
-        print 'Generating indices...'
+        print('Generating indices...')
         worker_ind, vote_ind, instance_ind = [], [], []
         for i in range(self.I):
             _instance_ind = instances == i
@@ -125,15 +125,15 @@ class DS:
         start = time()
         for ep in range(self.max_epochs):
             # begin epoch
-            print 'starting epoch ' + str(ep + 1)
+            print('starting epoch ' + str(ep + 1))
             if ep:
                 time_to_go = (time() - start) * (self.max_epochs - ep) / ep
                 if time_to_go >= 3600:
-                    print 'Estimated time to finish: %.2f hours' % (time_to_go / 3600,)
+                    print('Estimated time to finish: %.2f hours' % (time_to_go / 3600,))
                 elif time_to_go >= 60:
-                    print 'Estimated time to finish: %.2f minutes' % (time_to_go / 60,)
+                    print('Estimated time to finish: %.2f minutes' % (time_to_go / 60,))
                 else:
-                    print 'Estimated time to finish: %.1f seconds' % (time_to_go,)
+                    print('Estimated time to finish: %.1f seconds' % (time_to_go,))
             ep_start = time()
 
             # EM
@@ -154,25 +154,25 @@ class DS:
             # save information
             print('Calculating log-likelihood...')
             self.LL[ep] = self.calculate_log_like(worker_ind, vote_ind)
-            print 'Log-likelihood = %f' % (self.LL[ep],)
+            print('Log-likelihood = %f' % (self.LL[ep],))
 
             # evaulation if test available
             if test is not None:
                 self.accuracy[ep] = (self.labels.argmax(1) == test).mean()
-                print 'Accuracy = %f' % (self.accuracy[ep],)
+                print('Accuracy = %f' % (self.accuracy[ep],))
                 # ce = -np.log(self.labels[range(self.I), test] + self.eps).sum()
                 # print 'Cross Entropy = %f' % (ce,)
 
             # print epoch duration
-            print 'Epoch completed in %.1f seconds' % (time() - ep_start,)
+            print('Epoch completed in %.1f seconds' % (time() - ep_start,))
 
         time_total = time() - start
         if time_total >= 3600:
-            print 'DS completed in %.2f hours' % (time_total / 3600,)
+            print('DS completed in %.2f hours' % (time_total / 3600,))
         elif time_total >= 60:
-            print 'DS completed in %.2f minutes' % (time_total / 60,)
+            print('DS completed in %.2f minutes' % (time_total / 60,))
         else:
-            print 'DS completed in %.1f seconds' % (time_total,)
+            print('DS completed in %.1f seconds' % (time_total,))
 
     # # generate covariance estimates using inverse Wishart prior
     # def __estimate_label_cov_with_inv_wishart(self):
