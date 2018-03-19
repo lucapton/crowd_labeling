@@ -401,6 +401,9 @@ class CLLDA:
 
             # update cllda
             self.cllda(votes, workers, instances)
+            self.votes = votes
+            self.instances = instances
+            self.workers = workers
 
     # no cl_transform
     @staticmethod

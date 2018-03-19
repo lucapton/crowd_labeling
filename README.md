@@ -1,13 +1,13 @@
 # Crowd Labeling
 Code to perform crowd labeling.
 
-## Supported languages:
+#### Supported languages:
 * Python
 * MATLAB (planned)
 
-## Supported algorithms:
+#### Supported algorithms:
 * Majority Vote
-* Dawid & SKene
+* Dawid & Skene
 * Crowd Labeling Latent Dirichlet Allocation
 
 Pull requests are welcome.
