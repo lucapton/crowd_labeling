@@ -151,7 +151,7 @@ def tf_additive_log_ratio_transform(compositional, name='alrt'):
     import tensorflow as tf
     compositional = compositional + eps
     continuous = tf.log(compositional[..., :-1] /
-                       compositional[..., -1].reshape(compositional.shape[:-1] + (1,)), name=name)
+                       compositional[..., -1].reshape(tf.shape(compositional)[:-1] + (1,)), name=name)
     return continuous
 
 
@@ -159,7 +159,7 @@ def tf_additive_log_ratio_transform(compositional, name='alrt'):
 def tf_inverse_additive_log_ratio_transform(continuous, name='ialrt'):
     """Inverts the additive log-ratio transform, producing compositional data."""
     import tensorflow as tf
-    compositional = tf.stack((tf.exp(continuous), tf.ones((continuous.shape[0], 1))), axis=tf.get_shape(continuous).ndim - 1)
+    compositional = tf.concat((tf.exp(continuous), tf.ones((tf.shape(continuous)[0], 1))), axis=-1)
     compositional /= tf.reduce_sum(compositional, axis=-1, keep_dims=True, name=name)
     return compositional
 
